@@ -1,14 +1,46 @@
-name: Fix code styles
-on: [pull_request]
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [main]
+
 jobs:
-  build:
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: PHP Code Style
-        uses: ale94lko/php-cs-fixer-action@v1.0.1
-        with:
-          php-cs-fixer-version: v3.9.4
-          rules-version: v1.0.1
-          use-full-rules: false
+      - name: Validate deploy script syntax
+        run: bash -n src/deploy.sh
+
+      - name: Smoke test local deploy
+        run: |
+          set -euo pipefail
+
+          mkdir -p fixture
+          echo '<h1>ok</h1>' > fixture/index.html
+
+          bare="$(mktemp -d)/remote.git"
+          git init --bare "$bare"
+
+          export GITHUB_WORKSPACE="$PWD"
+          export GITHUB_OUTPUT="$(mktemp)"
+          export INPUT_FOLDER=fixture
+          export INPUT_BRANCH=gh-pages
+          export INPUT_TOKEN=unused
+          export INPUT_COMMIT_MESSAGE='Smoke test deploy'
+          export INPUT_GIT_USER_NAME=smoke-test
+          export INPUT_GIT_USER_EMAIL=smoke@example.com
+          export INPUT_CLEAN=true
+          export INPUT_FORCE=true
+          export INPUT_SINGLE_COMMIT=true
+          export INPUT_REPOSITORY=example/example
+          export INPUT_REMOTE_URL="$bare"
+
+          bash src/deploy.sh
+
+          grep -q 'deployed=true' "$GITHUB_OUTPUT"
+          commit="$(grep '^commit-hash=' "$GITHUB_OUTPUT" | cut -d= -f2)"
+          test -n "$commit"
+          git --git-dir="$bare" rev-parse "gh-pages" | grep -q "$commit"
+          git --git-dir="$bare" show "gh-pages:index.html" | grep -q '<h1>ok</h1>'

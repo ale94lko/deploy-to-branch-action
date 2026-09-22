@@ -9,44 +9,35 @@ body:
       value: |
         Thanks for taking the time to fill out this bug report!
 
-        Before you begin, **please ensure that there are no [existing issues](https://github.com/ale94lko/php-cs-fixer-action/issues), whether still open or closed, related to your report**.
+        Before you begin, **please ensure that there are no [existing issues](https://github.com/ale94lko/deploy-to-branch-action/issues), whether still open or closed, related to your report**.
         If there is, your report will be closed promptly.
         ---
 
   - type: input
-    id: php-cs-fixer-version
+    id: action-version
     attributes:
-      label: php-cs-fixer version
+      label: Action version
       description: |
-        e.g. v3.9.4
-        If you are not using the [latest version](https://github.com/FriendsOfPHP/PHP-CS-Fixer/releases), please
-        check to see if the problem occurs with the latest version.
+        e.g. v1.0.0
+        If you are not using the [latest release](https://github.com/ale94lko/deploy-to-branch-action/releases), please check whether the problem still occurs there.
     validations:
       required: true
 
-  - type: dropdown
-    id: rules-version
+  - type: input
+    id: folder
     attributes:
-      label: Rules version
-      description: Which php-cs-fixer-rules version did you run your code?
-      multiple: true
-      options:
-        - 'Default'
-        - 'v1.0'
-        - 'v1.0.1'
+      label: Folder
+      description: Value passed to the `folder` input
+      placeholder: dist
     validations:
       required: true
 
-  - type: dropdown
-    id: full-rules-version
+  - type: input
+    id: branch
     attributes:
-      label: Full or minimal rules version
-      description: Which rules package did you run your code?
-      multiple: true
-      options:
-        - 'Default'
-        - 'Full rules package'
-        - 'Minimal rules package'
+      label: Target branch
+      description: Value passed to the `branch` input
+      placeholder: gh-pages
     validations:
       required: true
 
@@ -76,7 +67,7 @@ body:
     attributes:
       label: Anything else?
       description: |
-        Links? References? Anything that will give us more context about the issue you are encountering!
+        Links? References? Workflow logs? Anything that will give us more context about the issue you are encountering!
 
         Tip: You can attach images or log files by clicking this area to highlight it and then dragging files in.
     validations:

@@ -1,15 +1,11 @@
-CHANGELOG for PHP CS Fixer Action
+CHANGELOG for Deploy to Branch Action
 ==========================
 
 This file contains changelogs for stable releases only.
-
-Changelog for v1.0.1
---------------------
-
-* feature: Add a template for bug reporting issues for better understanding of the error. [#8](https://github.com/ale94lko/php-cs-fixer-action/issues/8)
-* feature: Update documentation
 
 Changelog for v1.0.0
 --------------------
 
 * First stable release.
+* Deploy the contents of a folder to a target branch (for example `gh-pages` or `output`).
+* Support clean deploys, force push, and single-commit (orphan) mode.

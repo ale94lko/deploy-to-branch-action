@@ -1,90 +1,110 @@
-<h1 align="center">PHP Coding Standards Fixer Action</h1>
-<p>
-  <a href="https://github.com/ale94lko/php-cs-fixer-action/blob/main/LICENSE" target="_blank">
-    <img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-green.svg" />
-  </a>
-  <a href="https://github.com/ale94lko/repo-health-score">
-    <img src="https://github.com/ale94lko/php-cs-fixer-action/blob/output/badge.svg"/>
-  </a>
-  <a href="https://bestpractices.coreinfrastructure.org/projects/6296" target="_blank">
-    <img src="https://bestpractices.coreinfrastructure.org/projects/6296/badge">
-  </a>
-</p>
+# Deploy to Branch Action
 
-> A github action to fix PHP Coding Standards using [php-cs-fixer](https://github.com/FriendsOfPHP/PHP-CS-Fixer).
+> A GitHub Action that deploys the content of a folder to a branch.
+
+![License](https://img.shields.io/badge/License-MIT-green.svg)
+
+Useful for publishing build artifacts, documentation, badges, or static sites to branches such as `gh-pages` or `output`.
 
 ## Requirements
 
-- Be sure to have set the following before using the action
-  ```yaml
-  - uses: actions/checkout@v2
-  ```
+Checkout the repository before calling the action:
+
+```yaml
+- uses: actions/checkout@v4
+```
+
+The token needs permission to push to the target branch (`contents: write` when using `GITHUB_TOKEN`).
 
 ## Setup
 
-- Include the following in your action:
-  ```yaml
-  - name: php-cs-fixer
-    uses: ale94lko/php-cs-fixer-action@v1.0.1
-  ```
+```yaml
+- name: Deploy to branch
+  uses: ale94lko/deploy-to-branch-action@v1.0.0
+  with:
+    folder: dist
+    branch: gh-pages
+```
 
-## Parameters
+## Inputs
 
-| Name | Description | Required | Default | Values |
-|----------|:----------:|:----------:|:----------:|:----------:|
-| php-cs-fixer-version | Version of php-cs-fixer to download | `false` | `v3.9.4` | v`X.X.X` |
-| rules-version | Version of rules to check from [php-cs-fixer-rules](https://github.com/ale94lko/php-cs-fixer-rules) | `false` | `v1.0.1` | v`X.X.X` |
-| use-full-rules | Whether to use the full rules package or the minimal one | `false` | `true` | `true` OR `false` |
+| Name | Description | Required | Default |
+|------|-------------|:--------:|---------|
+| `folder` | Folder whose contents will be deployed | `true` | — |
+| `branch` | Target branch | `false` | `gh-pages` |
+| `token` | Token used to push | `false` | `${{ github.token }}` |
+| `commit-message` | Deployment commit message | `false` | `Deploy from GitHub Actions` |
+| `git-user-name` | Git `user.name` | `false` | `github-actions[bot]` |
+| `git-user-email` | Git `user.email` | `false` | `41898282+github-actions[bot]@users.noreply.github.com` |
+| `clean` | Remove existing files on the target branch before deploying | `false` | `true` |
+| `force` | Force-push the deployment branch | `false` | `true` |
+| `single-commit` | Keep only a single orphan commit on the target branch | `false` | `false` |
+| `repository` | Target repository (`owner/repo`) | `false` | current repository |
+| `remote-url` | Override the git remote URL (GitHub Enterprise or local testing) | `false` | auto from `token` + `repository` |
+
+## Outputs
+
+| Name | Description |
+|------|-------------|
+| `commit-hash` | SHA of the deployment commit (empty when nothing was pushed) |
+| `deployed` | `true` if a new commit was pushed, otherwise `false` |
 
 ## Examples
 
-### Simple use with default parameters
+### Deploy a build folder to `gh-pages`
+
 ```yaml
-name: Fix code styles
-on: [pull_request]
+name: Deploy site
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
-      - name: PHP Code Style
-        uses: ale94lko/php-cs-fixer-action@v1.0.1
+      - name: Build
+        run: npm ci && npm run build
+
+      - name: Deploy
+        uses: ale94lko/deploy-to-branch-action@v1.0.0
+        with:
+          folder: dist
+          branch: gh-pages
 ```
 
-### Simple use with `php-cs-fixer-version`
-```diff
-  - name: PHP Code Style
-    uses: ale94lko/php-cs-fixer-action@v1.0.1
-+   with:
-+     php-cs-fixer-version: v3.9.4
+### Deploy a badge to an `output` branch
+
+```yaml
+- name: Deploy badge
+  uses: ale94lko/deploy-to-branch-action@v1.0.0
+  with:
+    folder: dist
+    branch: output
+    commit-message: Update health score badge
+    single-commit: true
 ```
 
-### Simple use with `rules-version`
-```diff
-  - name: PHP Code Style
-    uses: ale94lko/php-cs-fixer-action@v1.0.1
-+   with:
-+     rules-version: v1.0.1
+### Keep existing files on the target branch
+
+```yaml
+- name: Deploy docs
+  uses: ale94lko/deploy-to-branch-action@v1.0.0
+  with:
+    folder: docs/_site
+    branch: gh-pages
+    clean: false
 ```
-
-### Simple use with `use-full-rules`
-```diff
-  - name: PHP Code Style
-    uses: ale94lko/php-cs-fixer-action@v1.0.1
-+   with:
-+     use-full-rules: true
-```
-
-## View live
-
-- [Successful test](https://github.com/ale94lko/php-cs-fixer-action/runs/7461553837?check_suite_focus=true)
-- [Failure test](https://github.com/ale94lko/php-cs-fixer-action/runs/7461551350?check_suite_focus=true)
 
 ## Contributing
 
-Please read through our [contributing guidelines](https://github.com/ale94lko/php-cs-fixer-action/blob/main/.github/CONTRIBUTING.md).
+Please read the [contributing guidelines](https://github.com/ale94lko/deploy-to-branch-action/blob/main/.github/CONTRIBUTING.md).
 
 ## License
 
-**php-cs-fixer-action** is an open source project that is licensed under [MIT](https://opensource.org/licenses/MIT).
+**deploy-to-branch-action** is licensed under [MIT](https://opensource.org/licenses/MIT).
